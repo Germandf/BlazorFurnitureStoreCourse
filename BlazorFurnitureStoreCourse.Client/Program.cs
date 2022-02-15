@@ -19,5 +19,6 @@ builder.Services.AddHttpClient("BlazorApp.PublicServerAPI", client => client.Bas
 builder.Services.AddApiAuthorization();
 
 builder.Services.AddScoped<IProductCategoryService, ProductCategoryService>();
+builder.Services.AddScoped<IProductService, ProductService>();
 
 await builder.Build().RunAsync();

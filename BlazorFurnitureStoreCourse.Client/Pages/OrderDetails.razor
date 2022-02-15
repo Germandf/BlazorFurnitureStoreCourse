@@ -1,18 +1,29 @@
 ﻿@page "/order-details"
 @inject IProductCategoryService _productCategoryService
+@inject IProductService _productService
 
 <h3>OrderDetails</h3>
 <p>@Message</p>
 
-@if (_order is not null && _productCategories is not null)
+@if (_order is not null && _productCategories is not null && _products is not null)
 {
     <EditForm Model="@_order">
-        <InputSelect class="form-control col-sm-5" TValue="int" @bind-Value="@_order.ProductCategoryId">
+        <label>Categories</label>
+        <InputSelect class="form-control col-sm-5" TValue="int" Value="@_order.ProductCategoryId" 
+            ValueChanged="(int productCategoryId) => ProductCategoryChanged(productCategoryId)" 
+            ValueExpression="() => _order.ProductCategoryId">
             @foreach (var item in _productCategories)
             {
                 <option value="@item.Id">@item.Name</option>
             }
-    </InputSelect>
+        </InputSelect>
+        <label>Products</label>
+        <InputSelect class="form-control col-sm-5" TValue="int" @bind-Value="@_productId">
+            @foreach (var item in _products)
+            {
+                <option value="@item.Id">@item.Name</option>
+            }
+        </InputSelect>
     </EditForm>
 }
 else
@@ -24,19 +35,34 @@ else
 
     private Order _order;
     private IEnumerable<ProductCategory> _productCategories;
+    private IEnumerable<Product> _products;
+    private int _productId;
     public string Message { get; set; } = "";
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            _order = new();
+            _order = new() { ProductCategoryId = 1 };
             _productCategories = await _productCategoryService.GetProductCategories();
+            await LoadProducts();
         }
         catch (Exception e)
         {
             Message = $"There was an error... {e.Message}";
         }
+    }
+
+    private async Task ProductCategoryChanged(int productCategoryId)
+    {
+        _order.ProductCategoryId = productCategoryId;
+        if (_order.ProductCategoryId > 0)
+            await LoadProducts();
+    }
+
+    private async Task LoadProducts()
+    {
+        _products = await _productService.GetProductsByCategory(_order.ProductCategoryId);
     }
 
 }
