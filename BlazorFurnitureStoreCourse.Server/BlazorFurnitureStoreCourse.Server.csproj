@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BlazorFurnitureStoreCourse.Client\BlazorFurnitureStoreCourse.Client.csproj" />
+    <ProjectReference Include="..\BlazorFurnitureStoreCourse.Repositories\BlazorFurnitureStoreCourse.Repositories.csproj" />
     <ProjectReference Include="..\BlazorFurnitureStoreCourse.Shared\BlazorFurnitureStoreCourse.Shared.csproj" />
   </ItemGroup>
 

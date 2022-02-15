@@ -14,10 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\BlazorFurnitureStoreCourse.Shared\BlazorFurnitureStoreCourse.Shared.csproj" />
   </ItemGroup>
 
