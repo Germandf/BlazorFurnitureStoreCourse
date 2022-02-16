@@ -5,18 +5,17 @@ namespace BlazorFurnitureStoreCourse.Client.Services
 {
     public class ClientService : IClientService
     {
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly HttpClient _httpClient;
 
-        public ClientService(IHttpClientFactory httpClientFactory)
+        public ClientService(HttpClient httpClient)
         {
-            _httpClientFactory = httpClientFactory;
+            _httpClient = httpClient;
         }
 
         public async Task<IEnumerable<BlazorFurnitureStoreCourse.Shared.Client>> GetClients()
         {
-            var client = _httpClientFactory.CreateClient("BlazorApp.PublicServerAPI");
-            return await client.GetFromJsonAsync<IEnumerable<BlazorFurnitureStoreCourse.Shared.Client>>("api/Client")
-                ?? new List<BlazorFurnitureStoreCourse.Shared.Client>();
+            var clients = await _httpClient.GetFromJsonAsync<IEnumerable<BlazorFurnitureStoreCourse.Shared.Client>>("api/Client");
+            return clients ?? new List<BlazorFurnitureStoreCourse.Shared.Client>();
         }
     }
 }

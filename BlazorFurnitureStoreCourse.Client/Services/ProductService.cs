@@ -5,18 +5,17 @@ namespace BlazorFurnitureStoreCourse.Client.Services
 {
     public class ProductService : IProductService
     {
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly HttpClient _httpClient;
 
-        public ProductService(IHttpClientFactory httpClientFactory)
+        public ProductService(HttpClient httpClient)
         {
-            _httpClientFactory = httpClientFactory;
+            _httpClient = httpClient;
         }
 
         public async Task<IEnumerable<Product>> GetProductsByCategory(int productCategoryId)
         {
-            var client = _httpClientFactory.CreateClient("BlazorApp.PublicServerAPI");
-            return await client.GetFromJsonAsync<IEnumerable<Product>>($"api/Product/GetByCategory/{productCategoryId}")
-                    ?? new List<Product>();
+            var products = await _httpClient.GetFromJsonAsync<IEnumerable<Product>>($"api/Product/GetByCategory/{productCategoryId}");
+            return products ?? new List<Product>();
         }
     }
 }

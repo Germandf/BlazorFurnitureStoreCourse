@@ -5,18 +5,17 @@ namespace BlazorFurnitureStoreCourse.Client.Services
 {
     public class OrderService : IOrderService
     {
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly HttpClient _httpClient;
 
-        public OrderService(IHttpClientFactory httpClientFactory)
+        public OrderService(HttpClient httpClient)
         {
-            _httpClientFactory = httpClientFactory;
+            _httpClient = httpClient;
         }
 
         public async Task SaveOrder(Order order)
         {
-            var client = _httpClientFactory.CreateClient("BlazorApp.PublicServerAPI");
             if (order.Id == 0)
-                await client.PostAsJsonAsync($"api/Order", order);
+                await _httpClient.PostAsJsonAsync($"api/Order", order);
             // TODO else
         }
     }
