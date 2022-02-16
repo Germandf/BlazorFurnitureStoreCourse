@@ -2,12 +2,14 @@
 @inject IProductCategoryService _productCategoryService
 @inject IProductService _productService
 @inject IClientService _clientService
+@inject IOrderService _orderService
+@inject NavigationManager _navigationManager
 
 <p>@Message</p>
 
 @if (_order is not null && _productCategories is not null && _products is not null)
 {
-    <EditForm Model="@_order">
+    <EditForm Model="@_order" OnValidSubmit="SaveOrder">
         <div class="card">
             <h5 class="card-header">Order Details</h5>
             <div class="card-body">
@@ -50,7 +52,7 @@
                     <div class="row">
                         <div class="col-md-4 mb-3 mx-auto text-center">
                             <button type="submit" class="btn btn-success me-2">Save</button>
-                            <button type="button" class="btn btn-secondary">Cancel</button>
+                            <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
                         </div>
                     </div>
                 </div>
@@ -122,6 +124,17 @@ else
     private async Task LoadProducts()
     {
         _products = await _productService.GetProductsByCategory(_order.ProductCategoryId);
+    }
+
+    private async Task SaveOrder()
+    {
+        await _orderService.SaveOrder(_order);
+        _navigationManager.NavigateTo("");
+    }
+
+    private void Cancel()
+    {
+        _navigationManager.NavigateTo("");
     }
 
 }
