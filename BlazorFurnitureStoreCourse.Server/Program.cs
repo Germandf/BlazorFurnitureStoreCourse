@@ -29,6 +29,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddSingleton<IDbConnection>(sp => new SqlConnection(connectionString));
 builder.Services.AddScoped<IProductCategoryRepository, ProductCategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
 var app = builder.Build();
 
