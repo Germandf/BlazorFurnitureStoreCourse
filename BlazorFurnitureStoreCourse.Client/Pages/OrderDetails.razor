@@ -1,6 +1,7 @@
 ﻿@page "/order-details"
 @inject IProductCategoryService _productCategoryService
 @inject IProductService _productService
+@inject IClientService _clientService
 
 <p>@Message</p>
 
@@ -26,7 +27,11 @@
                         <div class="col-md-12 mb-3">
                             <label for="">Client</label>
                             <InputSelect class="form-control" @bind-Value="_order.ClientId">
-
+                                <option value="0" selected hidden disabled>Select one...</option>
+                                @foreach (var item in _clients)
+                                {
+                                    <option value="@item.Id">@($"{item.LastName}, {item.FirstName}")</option>
+                                }
                             </InputSelect>
                         </div>
                     </div>
@@ -56,6 +61,7 @@
         <InputSelect class="form-control col-sm-5" TValue="int" Value="@_order.ProductCategoryId" 
             ValueChanged="(int productCategoryId) => ProductCategoryChanged(productCategoryId)" 
             ValueExpression="() => _order.ProductCategoryId">
+            <option value="0" selected hidden disabled>Select one...</option>
             @foreach (var item in _productCategories)
             {
                 <option value="@item.Id">@item.Name</option>
@@ -63,6 +69,7 @@
         </InputSelect>
         <label>Products</label>
         <InputSelect class="form-control col-sm-5" TValue="int" @bind-Value="@_productId">
+            <option value="0" selected hidden disabled>Select one...</option>
             @foreach (var item in _products)
             {
                 <option value="@item.Id">@item.Name</option>
@@ -80,6 +87,7 @@ else
     private Order _order;
     private IEnumerable<ProductCategory> _productCategories;
     private IEnumerable<Product> _products;
+    private IEnumerable<Client> _clients;
     private int _productId;
     public string Message { get; set; } = "";
 
@@ -87,8 +95,14 @@ else
     {
         try
         {
-            _order = new() { ProductCategoryId = 1 };
+            _order = new() 
+            { 
+                ProductCategoryId = 1, 
+                OrderDate = DateTime.Today, 
+                DeliveryDate = DateTime.Today.AddDays(7) 
+            };
             _productCategories = await _productCategoryService.GetProductCategories();
+            _clients = await _clientService.GetClients();
             await LoadProducts();
         }
         catch (Exception e)
@@ -100,6 +114,7 @@ else
     private async Task ProductCategoryChanged(int productCategoryId)
     {
         _order.ProductCategoryId = productCategoryId;
+        _productId = 0;
         if (_order.ProductCategoryId > 0)
             await LoadProducts();
     }

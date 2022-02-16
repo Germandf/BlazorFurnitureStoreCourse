@@ -21,5 +21,6 @@ builder.Services.AddApiAuthorization();
 builder.Services.AddScoped<IProductCategoryService, ProductCategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IClientService, ClientService>();
 
 await builder.Build().RunAsync();

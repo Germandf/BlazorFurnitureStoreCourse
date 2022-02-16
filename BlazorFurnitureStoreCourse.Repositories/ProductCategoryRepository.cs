@@ -15,9 +15,7 @@ namespace BlazorFurnitureStoreCourse.Repositories
 
         public async Task<IEnumerable<ProductCategory>> GetAll()
         {
-            var sql = @"SELECT Id, Name
-                        FROM ProductCategories";
-
+            var sql = @"SELECT Id, Name FROM ProductCategories";
             return await _dbConnection.QueryAsync<ProductCategory>(sql);
         }
     }
