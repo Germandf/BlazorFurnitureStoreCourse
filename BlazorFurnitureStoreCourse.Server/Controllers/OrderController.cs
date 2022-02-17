@@ -22,6 +22,18 @@ namespace BlazorFurnitureStoreCourse.Server.Controllers
             _orderProductRepository = orderProductRepository;
         }
 
+        [HttpGet]
+        public async Task<IEnumerable<Order>> Get()
+        {
+            return await _orderRepository.GetAll();
+        }
+
+        [HttpGet(nameof(GetNextNumber))]
+        public async Task<int> GetNextNumber()
+        {
+            return await _orderRepository.GetNextNumber();
+        }
+
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Order order)
         {
@@ -48,12 +60,6 @@ namespace BlazorFurnitureStoreCourse.Server.Controllers
             if (success)
                 return NoContent();
             return Conflict();
-        }
-
-        [HttpGet(nameof(GetNextNumber))]
-        public async Task<int> GetNextNumber()
-        {
-            return await _orderRepository.GetNextNumber();
         }
     }
 }

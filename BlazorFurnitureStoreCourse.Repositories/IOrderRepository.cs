@@ -7,5 +7,6 @@ namespace BlazorFurnitureStoreCourse.Repositories
         Task<bool> InsertOrder(Order order);
         Task<int> GetNextNumber();
         Task<int> GetNextId();
+        Task<IEnumerable<Order>> GetAll();
     }
 }

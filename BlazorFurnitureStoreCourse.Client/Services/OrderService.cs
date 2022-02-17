@@ -12,6 +12,12 @@ namespace BlazorFurnitureStoreCourse.Client.Services
             _httpClient = httpClient;
         }
 
+        public async Task<IEnumerable<Order>> GetAll()
+        {
+            return await _httpClient.GetFromJsonAsync<IEnumerable<Order>>($"api/Order") 
+                ?? new List<Order>();
+        }
+
         public async Task<int> GetNextNumber()
         {
             return await _httpClient.GetFromJsonAsync<int>($"api/Order/GetNextNumber");

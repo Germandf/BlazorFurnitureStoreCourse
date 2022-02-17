@@ -13,6 +13,14 @@ namespace BlazorFurnitureStoreCourse.Repositories
             _dbConnection = dbConnection;
         }
 
+        public async Task<IEnumerable<Order>> GetAll()
+        {
+            var sql = @"SELECT o.Id, o.OrderNumber, o.ClientId, o.OrderDate, o.DeliveryDate, o.Total, c.LastName + ', ' + c.FirstName as ClientName
+                        FROM Orders o
+                        INNER JOIN Clients c ON o.ClientId = c.Id";
+            return await _dbConnection.QueryAsync<Order>(sql);
+        }
+
         public async Task<int> GetNextId()
         {
             var sql = @"SELECT IDENT_CURRENT('Orders') + 1";

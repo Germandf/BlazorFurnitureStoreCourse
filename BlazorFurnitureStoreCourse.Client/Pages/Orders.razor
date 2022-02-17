@@ -1,0 +1,48 @@
+﻿@page "/orders"
+@inject IOrderService _orderService
+
+<p>@_message</p>
+
+@if(_orders is not null && _orders.Any())
+{
+    <MudTable Items="_orders" Hover="true" Breakpoint="Breakpoint.Sm">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Orders</MudText>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh>Number</MudTh>
+            <MudTh>Client</MudTh>
+            <MudTh>Total</MudTh>
+            <MudTh>Order Date</MudTh>
+            <MudTh>Delivery Date</MudTh>
+            <MudTh>Actions</MudTh>
+        </HeaderContent>
+        <RowTemplate Context="orderContext">
+            <MudTd DataLabel="Number">@orderContext.OrderNumber</MudTd>
+            <MudTd DataLabel="Client">@orderContext.ClientName</MudTd>
+            <MudTd DataLabel="Total">@orderContext.Total.ToString("C")</MudTd>
+            <MudTd DataLabel="Order Date">@orderContext.OrderDate</MudTd>
+            <MudTd DataLabel="Delivery Date">@orderContext.DeliveryDate</MudTd>
+            <MudTd DataLabel=""></MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+
+@code {
+
+    private IEnumerable<Order> _orders;
+    private string _message { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _orders = await _orderService.GetAll();
+        }
+        catch(Exception e)
+        {
+            _message = $"There was an error... {e.Message}";
+        }
+    }
+
+}

@@ -124,7 +124,7 @@
     private async Task SaveOrder()
     {
         await _orderService.SaveOrder(_order);
-        _navigationManager.NavigateTo("");
+        _navigationManager.NavigateTo("orders");
     }
 
     private void Cancel()
