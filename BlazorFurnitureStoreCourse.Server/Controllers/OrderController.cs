@@ -2,6 +2,7 @@
 using BlazorFurnitureStoreCourse.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Transactions;
 
 namespace BlazorFurnitureStoreCourse.Server.Controllers
 {
@@ -11,15 +12,20 @@ namespace BlazorFurnitureStoreCourse.Server.Controllers
     public class OrderController : ControllerBase
     {
         private readonly IOrderRepository _orderRepository;
+        private readonly IOrderProductRepository _orderProductRepository;
 
-        public OrderController(IOrderRepository orderRepository)
+        public OrderController(
+            IOrderRepository orderRepository, 
+            IOrderProductRepository orderProductRepository)
         {
             _orderRepository = orderRepository;
+            _orderProductRepository = orderProductRepository;
         }
 
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Order order)
         {
+            order.Id = await _orderRepository.GetNextId();
             if (order is null)
                 return BadRequest();
 
@@ -29,7 +35,16 @@ namespace BlazorFurnitureStoreCourse.Server.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var success = await _orderRepository.InsertOrder(order);
+            var success = false;
+            using (TransactionScope scope = new(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                success = await _orderRepository.InsertOrder(order);
+                if(order.Products is not null && order.Products.Any())
+                    foreach (var product in order.Products)
+                        success = await _orderProductRepository.InsertOrderProduct(order.Id, product);
+                scope.Complete();
+            }
+
             if (success)
                 return NoContent();
             return Conflict();

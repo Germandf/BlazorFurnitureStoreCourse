@@ -20,7 +20,7 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="">Number</label>
-                            <InputNumber class="form-control" @bind-Value="_order.OrderNumber" />
+                            <InputNumber class="form-control" disabled @bind-Value="_order.OrderNumber" />
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="">Order Date</label>
@@ -46,7 +46,7 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="">Total</label>
-                            <input type="text" class="form-control" readonly="readonly" value="@_order.Total.ToString("C")" />
+                            <input type="text" class="form-control" disabled value="@_order.Total.ToString("C")" />
                         </div>
                     </div>
                     @if(_order.Products is not null && _order.Products.Any())
