@@ -5,16 +5,18 @@
 @inject IClientService _clientService
 @inject IOrderService _orderService
 @inject NavigationManager _navigationManager
+@inject IDialogService _dialogService
+@inject ISnackbar _snackbar
 
-<p>@Message</p>
+<p>@_message</p>
 
-@if (_order is not null && _productCategories is not null && _products is not null)
-{
-    <EditForm Model="@_order" OnValidSubmit="SaveOrder">
-        <div class="card">
-            <h5 class="card-header">Order Details</h5>
-            <div class="card-body">
-                <div class="container">
+<div class="container">
+    @if (_order is not null && _clients is not null)
+    {
+        <EditForm Model="@_order" OnValidSubmit="SaveOrder">
+            <div class="card">
+                <h5 class="card-header">Order Details</h5>
+                <div class="card-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="">Number</label>
@@ -25,7 +27,6 @@
                             <InputDate class="form-control" @bind-Value="_order.OrderDate" />
                         </div>
                     </div>
-
                     <div class="row">
                         <div class="col-md-12 mb-3">
                             <label for="">Client</label>
@@ -38,7 +39,6 @@
                             </InputSelect>
                         </div>
                     </div>
-
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="">Delivery Date</label>
@@ -46,85 +46,79 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="">Total</label>
-                            <InputNumber class="form-control" @bind-Value="_order.Total" />
+                            <input type="text" class="form-control" readonly="readonly" value="@_order.Total.ToString("C")" />
                         </div>
                     </div>
-
+                    @if(_order.Products is not null && _order.Products.Any())
+                    {
+                        <MudTable Items="_order.Products" Hover="true" Breakpoint="Breakpoint.Sm" Class="mb-3">
+                            <ToolBarContent>
+                                <MudText Typo="Typo.h6">Products</MudText>
+                            </ToolBarContent>
+                            <HeaderContent>
+                                <MudTh>Name</MudTh>
+                                <MudTh>Price</MudTh>
+                                <MudTh>Quantity</MudTh>
+                                <MudTh>Actions</MudTh>
+                            </HeaderContent>
+                            <RowTemplate Context="productContext">
+                                <MudTd DataLabel="Name">@productContext.Name</MudTd>
+                                <MudTd DataLabel="Price">@productContext.Price</MudTd>
+                                <MudTd DataLabel="Quantity">@productContext.Quantity</MudTd>
+                                <MudTd DataLabel="">
+                                    <MudFab OnClick="() => RemoveProduct(productContext.Id)"
+                                            Color="Color.Secondary"
+                                            Icon="@Icons.Material.Filled.Delete"
+                                            Size="Size.Small"
+                                            IconSize="Size.Small" />
+                                </MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    }
                     <div class="row">
                         <div class="col-md-4 mb-3 mx-auto text-center">
-                            <button type="submit" class="btn btn-success me-2">Save</button>
-                            <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+                            <button type="button" class="btn btn-secondary" @onclick="AddProduct">Add Product</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="mb-3 mx-auto text-end">
+                            <button type="button" class="btn btn-danger me-2" @onclick="Cancel">Cancel</button>
+                            <button type="submit" class="btn btn-success">Save</button>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <label>Categories</label>
-        <InputSelect class="form-control col-sm-5" TValue="int" Value="@_order.ProductCategoryId" 
-            ValueChanged="(int productCategoryId) => ProductCategoryChanged(productCategoryId)" 
-            ValueExpression="() => _order.ProductCategoryId">
-            <option value="0" selected hidden disabled>Select one...</option>
-            @foreach (var item in _productCategories)
-            {
-                <option value="@item.Id">@item.Name</option>
-            }
-        </InputSelect>
-        <label>Products</label>
-        <InputSelect class="form-control col-sm-5" TValue="int" @bind-Value="@_productId">
-            <option value="0" selected hidden disabled>Select one...</option>
-            @foreach (var item in _products)
-            {
-                <option value="@item.Id">@item.Name</option>
-            }
-        </InputSelect>
-    </EditForm>
-}
-else
-{
-    <p>Loading...</p>
-}
+        </EditForm>
+    }
+    else
+    {
+        <p>Loading...</p>
+    }
+</div>
 
 @code {
 
-    private Order _order;
-    private IEnumerable<ProductCategory> _productCategories;
-    private IEnumerable<Product> _products;
-    private IEnumerable<Client> _clients;
-    private int _productId;
-    public string Message { get; set; } = "";
+    private Order _order = null!;
+    private IEnumerable<Client> _clients = null!;
+    private string _message = "";
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             _order = new() 
-            { 
+            {
+                OrderNumber = await _orderService.GetNextNumber(),
                 ProductCategoryId = 1, 
                 OrderDate = DateTime.Today, 
                 DeliveryDate = DateTime.Today.AddDays(7) 
             };
-            _productCategories = await _productCategoryService.GetProductCategories();
             _clients = await _clientService.GetClients();
-            await LoadProducts();
         }
         catch (Exception e)
         {
-            Message = $"There was an error... {e.Message}";
+            _message = $"There was an error... {e.Message}";
         }
-    }
-
-    private async Task ProductCategoryChanged(int productCategoryId)
-    {
-        _order.ProductCategoryId = productCategoryId;
-        _productId = 0;
-        if (_order.ProductCategoryId > 0)
-            await LoadProducts();
-    }
-
-    private async Task LoadProducts()
-    {
-        _products = await _productService.GetProductsByCategory(_order.ProductCategoryId);
     }
 
     private async Task SaveOrder()
@@ -136,6 +130,23 @@ else
     private void Cancel()
     {
         _navigationManager.NavigateTo("");
+    }
+
+    private async Task AddProduct()
+    {
+        var dialog = _dialogService.Show<ProductDetails>("Product Details");
+        var result = await dialog.Result;
+        if (!result.Cancelled)
+        {
+            var product = (Product)result.Data;
+            _order.Products.Add(product);
+        }
+    }
+
+    private async Task RemoveProduct(int productId)
+    {
+        _snackbar.Add("Product removed", Severity.Success, x => x.VisibleStateDuration = 600);
+        _order.Products.RemoveAll(x => x.Id == productId);
     }
 
 }

@@ -5,5 +5,6 @@ namespace BlazorFurnitureStoreCourse.Client.Services
     public interface IOrderService
     {
         Task SaveOrder(Order order);
+        Task<int> GetNextNumber();
     }
 }

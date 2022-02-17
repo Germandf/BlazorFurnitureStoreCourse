@@ -5,5 +5,6 @@ namespace BlazorFurnitureStoreCourse.Repositories
     public interface IOrderRepository
     {
         Task<bool> InsertOrder(Order order);
+        Task<int> GetNextNumber();
     }
 }

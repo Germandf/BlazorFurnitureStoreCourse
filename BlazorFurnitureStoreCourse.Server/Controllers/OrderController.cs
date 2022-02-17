@@ -34,5 +34,11 @@ namespace BlazorFurnitureStoreCourse.Server.Controllers
                 return NoContent();
             return Conflict();
         }
+
+        [HttpGet(nameof(GetNextNumber))]
+        public async Task<int> GetNextNumber()
+        {
+            return await _orderRepository.GetNextNumber();
+        }
     }
 }

@@ -13,6 +13,13 @@ namespace BlazorFurnitureStoreCourse.Repositories
             _dbConnection = dbConnection;
         }
 
+        public async Task<int> GetNextNumber()
+        {
+            var sql = @"SELECT MAX(OrderNumber) + 1
+                        FROM Orders";
+            return await _dbConnection.QueryFirstAsync<int>(sql);
+        }
+
         public async Task<bool> InsertOrder(Order order)
         {
             var sql = @"INSERT INTO Orders (OrderNumber, ClientId, OrderDate, DeliveryDate, Total)

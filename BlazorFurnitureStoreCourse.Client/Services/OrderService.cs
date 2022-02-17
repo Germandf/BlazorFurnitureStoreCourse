@@ -12,6 +12,11 @@ namespace BlazorFurnitureStoreCourse.Client.Services
             _httpClient = httpClient;
         }
 
+        public async Task<int> GetNextNumber()
+        {
+            return await _httpClient.GetFromJsonAsync<int>($"api/Order/GetNextNumber");
+        }
+
         public async Task SaveOrder(Order order)
         {
             if (order.Id == 0)

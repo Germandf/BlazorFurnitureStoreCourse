@@ -4,6 +4,7 @@ namespace BlazorFurnitureStoreCourse.Repositories
 {
     public interface IProductRepository
     {
-        public Task<IEnumerable<Product>> GetByCategory(int productCategoryId);
+        Task<IEnumerable<Product>> GetByCategory(int productCategoryId);
+        Task<Product> GetDetails(int productId);
     }
 }

@@ -1,0 +1,118 @@
+﻿@inject IProductCategoryService _productCategoryService
+@inject IProductService _productService
+@inject ISnackbar _snackbar
+
+<MudDialog>
+    <TitleContent>
+        Product Details
+    </TitleContent>
+    <DialogContent>
+        <EditForm Model="@_product">
+            <div class="card">
+                <div class="card-body">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="">Category</label>
+                                <InputSelect class="form-control" TValue="int" Value="@_product.ProductCategoryId" 
+                                    ValueChanged="(int productCategoryId) => ProductCategoryChanged(productCategoryId)" 
+                                    ValueExpression="() => _product.ProductCategoryId">
+                                    <option value="0" selected hidden disabled>Select one...</option>
+                                    @foreach (var item in _productCategories)
+                                    {
+                                        <option value="@item.Id">@item.Name</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="">Product</label>
+                                <InputSelect class="form-control" TValue="int" Value="_product.Id"
+                                    ValueChanged="(int productId) => ProductChanged(productId)" 
+                                    ValueExpression="() => _product.Id">>
+                                    <option value="0" selected hidden disabled>Select one...</option>
+                                    @foreach (var item in _products)
+                                    {
+                                        <option value="@item.Id">@item.Name</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <MudNumericField Disabled="true" Label="Price" Variant="Variant.Outlined" @bind-Value="_product.Price" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <MudNumericField Label="Quantity" Variant="Variant.Outlined" @bind-Value="@_product.Quantity" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </EditForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="AddProduct">Add</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter]
+    public MudDialogInstance MudDialog { get; set; }
+
+    private Product _product { get; set; } = new();
+    private IEnumerable<ProductCategory> _productCategories = new List<ProductCategory>();
+    private IEnumerable<Product> _products = new List<Product>();
+    private string _message = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _productCategories = await _productCategoryService.GetProductCategories();
+            if(_productCategories is not null && _productCategories.Any())
+            {
+                _product.ProductCategoryId = _productCategories.FirstOrDefault()!.Id;
+                await LoadProducts();
+            }
+        }
+        catch (Exception e)
+        {
+            _message = $"There was an error... {e.Message}";
+        }
+    }
+
+    private async Task ProductCategoryChanged(int productCategoryId)
+    {
+        _product.ProductCategoryId = productCategoryId;
+        _product.Id = 0;
+        if (_product.ProductCategoryId > 0)
+            await LoadProducts();
+    }
+
+    private async Task ProductChanged(int productId)
+    {
+        if(productId > 0)
+            _product = await _productService.GetDetails(productId);
+    }
+
+    private async Task LoadProducts()
+    {
+        _products = await _productService.GetProductsByCategory(_product.ProductCategoryId);
+        if (_products is not null && _products.Any())
+            _product = await _productService.GetDetails(_products.FirstOrDefault()!.Id);
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private void AddProduct()
+    {
+        _snackbar.Add("Product added", Severity.Success, x => x.VisibleStateDuration = 600);
+        MudDialog.Close(DialogResult.Ok(_product));
+    }
+
+}
