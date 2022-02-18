@@ -1,4 +1,5 @@
 ﻿@page "/order-details"
+@page "/order-details/{Id:int}"
 @attribute [Authorize]
 @inject IProductCategoryService _productCategoryService
 @inject IProductService _productService
@@ -98,6 +99,9 @@
 
 @code {
 
+    [Parameter]
+    public int Id { get; set; }
+
     private Order _order = null!;
     private IEnumerable<Client> _clients = null!;
     private string _message = "";
@@ -106,13 +110,20 @@
     {
         try
         {
-            _order = new() 
+            if(Id > 0)
             {
-                OrderNumber = await _orderService.GetNextNumber(),
-                ProductCategoryId = 1, 
-                OrderDate = DateTime.Today, 
-                DeliveryDate = DateTime.Today.AddDays(7) 
-            };
+                _order = await _orderService.GetDetails(Id);
+            }
+            else
+            {
+                _order = new() 
+                {
+                    OrderNumber = await _orderService.GetNextNumber(),
+                    ProductCategoryId = 1, 
+                    OrderDate = DateTime.Today, 
+                    DeliveryDate = DateTime.Today.AddDays(7) 
+                };
+            }
             _clients = await _clientService.GetClients();
         }
         catch (Exception e)

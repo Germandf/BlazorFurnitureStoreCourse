@@ -13,6 +13,23 @@ namespace BlazorFurnitureStoreCourse.Repositories
             _dbConnection = dbConnection;
         }
 
+        public async Task<bool> DeleteByOrder(int orderId)
+        {
+            var sql = @"DELETE FROM OrderProducts
+                        WHERE OrderId = @Id";
+            var result = await _dbConnection.ExecuteAsync(sql, new { Id = orderId });
+            return result > 0;
+        }
+
+        public async Task<IEnumerable<Product>> GetByOrder(int orderId)
+        {
+            var sql = @"SELECT Id, Name, Price, CategoryId as ProductCategoryId, Quantity
+                        FROM OrderProducts
+                        INNER JOIN Products p ON p.Id = ProductId
+                        WHERE OrderId = @Id";
+            return await _dbConnection.QueryAsync<Product>(sql, new { Id = orderId });
+        }
+
         public async Task<bool> InsertOrderProduct(int orderId, Product product)
         {
             var sql = @"INSERT INTO OrderProducts (OrderId, ProductId, Quantity)

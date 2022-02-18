@@ -1,5 +1,6 @@
 ﻿@page "/orders"
 @inject IOrderService _orderService
+@inject NavigationManager _navigationManager
 
 <p>@_message</p>
 
@@ -15,7 +16,8 @@
             <MudTh>Total</MudTh>
             <MudTh>Order Date</MudTh>
             <MudTh>Delivery Date</MudTh>
-            <MudTh>Actions</MudTh>
+            <MudTh></MudTh>
+            <MudTh></MudTh>
         </HeaderContent>
         <RowTemplate Context="orderContext">
             <MudTd DataLabel="Number">@orderContext.OrderNumber</MudTd>
@@ -23,26 +25,50 @@
             <MudTd DataLabel="Total">@orderContext.Total.ToString("C")</MudTd>
             <MudTd DataLabel="Order Date">@orderContext.OrderDate</MudTd>
             <MudTd DataLabel="Delivery Date">@orderContext.DeliveryDate</MudTd>
-            <MudTd DataLabel=""></MudTd>
+            <MudTd DataLabel="">
+                <MudFab OnClick="() => Edit(orderContext.Id)"
+                        Color="Color.Primary"
+                        Icon="@Icons.Material.Filled.Edit"
+                        Size="Size.Small"
+                        IconSize="Size.Small" />
+            </MudTd>
+            <MudTd DataLabel="">
+                <MudFab OnClick="() => Delete(orderContext.Id)"
+                        Color="Color.Secondary"
+                        Icon="@Icons.Material.Filled.Delete"
+                        Size="Size.Small"
+                        IconSize="Size.Small" />
+            </MudTd>
         </RowTemplate>
     </MudTable>
 }
 
 @code {
 
-    private IEnumerable<Order> _orders;
+    private List<Order> _orders;
     private string _message { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            _orders = await _orderService.GetAll();
+            _orders = (await _orderService.GetAll()).ToList();
         }
         catch(Exception e)
         {
             _message = $"There was an error... {e.Message}";
         }
+    }
+
+    private async Task Edit(int id)
+    {
+        _navigationManager.NavigateTo($"order-details/{id}");
+    }
+
+    private async Task Delete(int id)
+    {
+        await _orderService.DeleteOrder(id);
+        _orders.RemoveAll(x => x.Id == id);
     }
 
 }
